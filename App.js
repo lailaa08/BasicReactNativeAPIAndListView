@@ -1,132 +1,96 @@
-import React, {useState} from 'react';
-import { StyleSheet, Text, View, Button, ActionSheetIOS, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
-import Constants from 'expo-constants';
 
-const DATA = [
-  {
-    id: '0',
-    title: 'Pre-School',
-  },
-  {
-    id: '1',
-    title: 'High School',
-  },
-  {
-    id: '2',
-    title: 'Undergraduate Student',
-  },
-  {
-    id: '3',
-    title: 'Masters Student',
+import AppNavigator from './AppNavigator';
+import React, { useState, Component } from "react";
+import { FlatList, TouchableOpacity, ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import 'react-native-gesture-handler';
+import { NavigationContainer, NavigationHelpersContext } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+export default class Home extends React.Component {
+  onclick_item(item) {
+    let ID = item.Id
+    switch (ID) {
+      case "1":
+        this.props.navigation.navigate('About')
+        break;
+      case "Jackson":
+        //navigate
+        break;
+      default:
+      //whatever you want
+    }
+  }
+  constructor(){
+    super();
+    this.state = {
+      isLoading: true,
+      dataSource: []
+    }
+  }
+
+
+  
+  componentDidMount(){
+    fetch('https://jsonplaceholder.typicode.com/posts').then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({
+        isLoading: false,
+        dataSource: responseJson
+      })
+    })
+  }
+
+
+  _renderItem = ({item, navigation, Friends}) => (
+  <TouchableOpacity onPress={() => navigation.navigate('Friends')}>
+    <View style={styles.item}>
+  <Text>
+    {item.title}
+    </Text>
+    </View>
+    </TouchableOpacity>);
+
+
+  render() {
     
-  },
-  {
-    id: '4',
-    title: 'PhD Student',
-  },
-  {
-    id: '5',
-    title: 'No Education',
-  },
-
-];
-
-function Item({ id, title, selected, onSelect }) {
-  return (
-    <TouchableOpacity
-      onPress={() => onSelect(id)}
-      style={[
-        styles.item,
-        { backgroundColor: selected ? '#00ff00' : '#ff0000' },
-      ]}
-    >
-      <Text style={styles.title}>{title}</Text>
-    </TouchableOpacity>
-  );
-}
-
-
-
-export default function App() {
-  const [result, setResult] = useState("Random Number!");
-  const [selected, setSelected] = React.useState(new Map());
-  const onSelect = React.useCallback(
-    id => {
-      const newSelected = new Map(selected);
-      newSelected.set(id, !selected.get(id));
-      setSelected(newSelected);
-    },
-    [selected],
-  );
-
-  const onPress = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
-      {
-        options: ["Cancel", "Generate Number", "Reset"],
-        destructiveButtonIndex: 2,
-        cancelButtonIndex: 0
-      },
-      buttonIndex => {
-        if (buttonIndex === 0) {
-          //cancel action
-        } else if (buttonIndex === 1) {
-          setResult(Math.floor(Math.random() * 100) + 1);
-        } else if (buttonIndex === 2) {
-          setResult("Random Number!");
-        }
-      }
-    );
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.result}>{result}</Text>
-      <Button onPress={onPress} title="Click here to see options!"/>
-      <Text style={styles.text}>What type of student are you?</Text>
-    <FlatList
-      data={DATA}
-      renderItem={({ item }) => (
-        <Item
-          id={item.id}
-          title={item.title}
-          selected={!!selected.get(item.id)}
-          onSelect={onSelect}
+    if(this.state.isLoading){
+      return (
+        <NavigationContainer>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" animating></ActivityIndicator>
+          </View>
+          </NavigationContainer>
+      )
+    } else{
+    return (
+      <NavigationContainer>
+      <View style={styles.container}>
+        <FlatList
+          data={this.state.dataSource}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={this._renderItem}
         />
-      )}
-      keyExtractor={item => item.id}
-      extraData={selected}
-    />
-  </SafeAreaView>
-  );
+      </View>
+      </NavigationContainer>
+    );
+    }
+    
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 15,
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Constants.statusBarHeight,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5FCFF"
   },
+
   item: {
-    backgroundColor: '#ff0000',
-    padding: 20,
-    marginVertical: 10,
-    marginHorizontal: 16,
-  },
-  title: {
-    flex: 4,
-    fontSize: 32,
-    textAlign: 'center',
-  },
-  result: {
-    fontSize: 40,
-    textAlign: "center",
-
-  },
-  text: {
-    fontSize: 20,
-    textAlign: "center",
-
+    padding: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   }
-
 
 });
